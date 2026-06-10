@@ -20,7 +20,6 @@ services:
   - type: web
     name: rag-frontend
     runtime: static
-    region: oregon
     plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: out
