@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional
 import uvicorn
@@ -10,7 +12,7 @@ app = FastAPI(title="RAG API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -99,6 +101,11 @@ async def delete_source(collection_name: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Serve Next.js static build — must be last so API routes take priority
+_static = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(_static):
+    app.mount("/", StaticFiles(directory=_static, html=True), name="frontend")
+
+
 if __name__ == "__main__":
-    # reload=False so uvicorn doesn't fork — policy set above takes effect
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
